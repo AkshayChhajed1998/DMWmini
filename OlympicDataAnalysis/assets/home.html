@@ -1,0 +1,21 @@
+{% extends './display.html' %}
+
+{% block title %}
+HOME
+{% endblock %}
+
+{% block content %}
+<div class="ui container">
+  <div class="ui inverted segment">
+    <p style="font-family:'Acme';font-size:70px;text-align:center">MENU</p>
+  </div>
+  <div class="ui grid">
+    <div class="sixteen wide column">
+      <a class="ui fluid inverted green button" href="fiapriori/init" id="apriori_a">Analyze Frequent Items Using Apriori</a>
+    </div>
+    <div class="sixteen wide column">
+      <a class="ui fluid inverted purple button" href="kmeans/init" id="kmeans_a">Analyze Using Kmeans Clustering</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

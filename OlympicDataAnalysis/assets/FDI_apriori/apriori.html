@@ -1,0 +1,48 @@
+{% extends "../display.html" %}
+{% block title %}
+APRIORI
+{% endblock %}
+
+{% block linkScript %}
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+<script type="text/js" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/FDI_apriori/apriori.css">
+<link href="https://fonts.googleapis.com/css?family=Acme&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="ui inverted teal segment">
+<p style="font-family: 'Acme', sans Serif;font-size:35px;text-align:center">Frequent Itemset Retrival Using Apriori</p>
+</div>
+<a href="/" class="ui inverted green button" id="home">HOME</a>
+<div class="ui container">
+  <div class="ui divider"></div>
+  <div class="ui grid">
+    <div class="four wide column">
+      <p style="font-family:'Acme';font-size:25px;color:white;text-align:center;">Select Sport:</p>
+    </div>
+    <div class="six wide column">
+      <select class="ui simple fluid dropdown" name="sport" id="select">
+        <option val="">Select Sport</option>
+        {% for val in sports%}
+        <option value="{{val}}">{{val}}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="two wide column">
+      <input class="ui fluid inverted green button" type="submit" id="fetch" value="FETCH">
+    </div>
+    <div class="four wide column"></div>
+  </div>
+  <div class="ui divider"></div>
+</div>
+<div class="ui container">
+  <div class="ui grid">
+    <div class="sixteen wide column">
+      <div class="ui container" id="display">
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/FDI_apriori/apriori.js"></script>
+{% endblock %}

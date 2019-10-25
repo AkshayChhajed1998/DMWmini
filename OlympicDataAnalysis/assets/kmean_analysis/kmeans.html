@@ -1,0 +1,62 @@
+{% extends '../display.html' %}
+
+{% block  title %}
+KMEANS
+{% endblock  %}
+
+{% block linkScript %}
+  <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="ui inverted teal segment">
+  <p style="font-family: 'Acme', sans Serif;font-size:35px;text-align:center">KMeans</p>
+  </div>
+  <a href="/" class="ui inverted green button" id="home">HOME</a>
+  <div class="ui divider"></div>
+  <form action="/kmeans/perform/" method="POST">
+  <div class="ui grid">
+    <div class="three wide column">
+      <p style="font-family:'Acme';font-size:25px;color:white;text-align:center;">Select Type:</p>
+    </div>
+    <div class="three wide column">
+      <select class="ui simple fluid dropdown" name="year" id="select_year">
+        {% for y in years %}
+        <option value={{y}} {% if Y == y%}selected{% endif %}>{{y}}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="four wide column">
+      <select class="ui simple fluid dropdown" name="type" id="select">
+        <option value="GDPNorm" {% if sel == "GDPNorm"%}selected{% endif %}>GDP</option>
+        <option value="PopulationNorm" {% if sel == "PopulationNorm"%}selected{% endif %}>Population</option>
+      </select>
+    </div>
+    <div class="two wide column">
+      <input class="ui inverted green button" type="submit" id="button" value="FETCH"></button>
+    </div>
+    <div class="four wide column"></div>
+  </div>
+  </form>
+  <div class="ui divider"></div>
+  <div class="ui container">
+  <div class="ui grid">
+    <div class="sixteen wide column">
+      <div class="ui horizontal divider">
+        <p style="color:orange;font-size:40px" id="fig1_a">{{fig1_a|safe}}</p>
+      </div>
+    </div>
+    <div class="sixteen wide column" style="height:700px" id="fig1">
+      {{fig1|safe}}
+    </div>
+    <div class="sixteen wide column">
+      <div class="ui horizontal divider">
+        <p style="color:orange;font-size:40px" id="fig2_a">{{fig2_a|safe}}</p> 
+      </div>
+    </div>
+    <div class="sixteen wide column" style="height:700px" id="fig2" >
+      {{fig2|safe}}
+    </div>
+  </div>
+  </div>
+{% endblock %}
