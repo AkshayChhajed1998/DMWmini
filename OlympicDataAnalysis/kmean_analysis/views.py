@@ -69,12 +69,12 @@ def fig(s,year=2016):
     y_kmeans = kmeans.fit_predict(topMedalHolders[['Medal_WonNorm','GDPNorm','PopulationNorm']])
     centroids = kmeans.cluster_centers_
     fig2=offline.plot({"data":[go.Scatter3d(x=topMedalHolders['Medal_WonNorm'],y=topMedalHolders['GDPNorm'],z=topMedalHolders['PopulationNorm'],mode="markers",marker=dict(
-                size=16,
+                size=10,
                 color= kmeans.labels_.astype(float), #set color equal to a variable
                 colorscale='Rainbow', # one of plotly colorscales
                 showscale=True)),
                 go.Scatter3d(x=centroids[:,0],y=centroids[:,1],z=centroids[:,2],mode="markers",marker=dict(
-                size=16,
+                size=10,
                 color='red'))]}, include_plotlyjs=False, output_type='div')
   else:
     wcss = []
@@ -110,7 +110,7 @@ def fig(s,year=2016):
                 color= kmeans.labels_.astype(float), #set color equal to a variable
                 colorscale='Rainbow', # one of plotly colorscales
                 showscale=True)),
-                go.Scatter3d(x=centroids[:,0],y=centroids[:,1],mode="markers",marker=dict(
+                go.Scatter(x=centroids[:,0],y=centroids[:,1],mode="markers",marker=dict(
                 size=16,
                 color='red'))],
                         "layout": go.Layout(title=fig2_a,xaxis={'title':'Medal Won'},yaxis={'title':ti})
