@@ -4,6 +4,7 @@ import numpy as np
 from mlxtend.preprocessing import TransactionEncoder
 from django.views.decorators.csrf import csrf_exempt
 
+#Helper Function
 def makeSelectiveSportDataset(fromData,sport,colList):
     toData = fromData[fromData['Sport'] == sport]
     toData =toData[colList]
@@ -12,17 +13,13 @@ def makeSelectiveSportDataset(fromData,sport,colList):
     toData = toData[toData.Medal.isin(med)]
     return(toData)
 
+#Apriori Function
 def applyApriori(dataset,support):
     rec = dataset.values.tolist()
-    # Finding Frequent Item Sets
-
     te = TransactionEncoder()
     te_ary = te.fit(rec).transform(rec)
     df = pd.DataFrame(te_ary, columns=te.columns_)
-    
-    # Applying Aprioi Algo
     from mlxtend.frequent_patterns import apriori
-    
     freq_Itemsets =  apriori(df,min_support = support, use_colnames = True)
     freq_Itemsets['length'] = freq_Itemsets['itemsets'].apply(lambda x:len(x))
     return(freq_Itemsets[freq_Itemsets['length'] > 1])

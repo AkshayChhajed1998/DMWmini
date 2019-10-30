@@ -1,5 +1,4 @@
 from django.shortcuts import render,HttpResponse
-import mpld3
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd 
 import numpy as np
@@ -15,7 +14,6 @@ def initialize(request):
   od = pd.read_csv('./assets/processed_dataset/processed_olympic_gdp_pop.csv')
   index = [int(x) for x in od['Year'].drop_duplicates().tolist() if int(x)>=1960]
   index.sort()
-  print(index)
   return render(request,'kmean_analysis/kmeans.html',{'years':index})
 
 @csrf_exempt
@@ -24,6 +22,8 @@ def perform(request):
   year = int(request.POST['year'])
   return render(request,'kmean_analysis/kmeans.html',fig(s,year))
 
+
+#Kmeans Function
 def fig(s,year=2016):
   olympics_complete = pd.read_csv('./assets/processed_dataset/processed_olympic_gdp_pop.csv')
   olympics_complete['Medal_Won'] = np.where(olympics_complete.loc[:,'Medal'] == 'None', 0, 1)
@@ -51,41 +51,70 @@ def fig(s,year=2016):
   medal_count_per_country['PopulationNorm'] = (medal_count_per_country['Population']-medal_count_per_country['Population'].mean())/np.std(medal_count_per_country['Population'],axis = 0)
   topMedalHolders = medal_count_per_country
   from sklearn.cluster import KMeans
-  wcss = []
-  for i in range(1, 11):
-      kmeans = KMeans(n_clusters = i, init = 'k-means++', random_state = 42)
-      kmeans.fit(topMedalHolders.iloc[:, [4, 5]].values)
-      wcss.append(kmeans.inertia_)
-  if s=='GDPNorm':
+  if s == 'Population-GDP':
+    wcss = []
     fig1_a='SUM of SQUARE of DISTANCE from RESPECTIVE CENTEROID'
-    fig2_a='KMEAN for MEDAL WON VS GDP'
-    ti='GDP'
+    fig2_a='KMEAN for MEDAL WON VS GDP & Population'
+    for i in range(1, 11):
+        kmeans = KMeans(n_clusters = i, init = 'k-means++', random_state = 42)
+        kmeans.fit(topMedalHolders[['Medal_WonNorm','GDPNorm','PopulationNorm']].values)
+        wcss.append(kmeans.inertia_)
+    fig1 = offline.plot({"data":[go.Scatter(x=[1,2,3,4,5,6,7,8,9,10],y=wcss,mode="lines",marker=dict(
+      size=16,
+      color= [0,1,2,3,4,5,6,7,8,9], #set color equal to a variable
+      colorscale= 'Rainbow', # one of plotly colorscales
+      showscale=True
+    ))],"layout": go.Layout(title=fig1_a,xaxis={'title':'Number of Cluster'},yaxis={'title':'Sum of Square of each point from respective centroid'})},include_plotlyjs=False,output_type='div')
+    kmeans = KMeans(n_clusters = 4, init = 'k-means++', random_state = 42)
+    y_kmeans = kmeans.fit_predict(topMedalHolders[['Medal_WonNorm','GDPNorm','PopulationNorm']])
+    centroids = kmeans.cluster_centers_
+    fig2=offline.plot({"data":[go.Scatter3d(x=topMedalHolders['Medal_WonNorm'],y=topMedalHolders['GDPNorm'],z=topMedalHolders['PopulationNorm'],mode="markers",marker=dict(
+                size=16,
+                color= kmeans.labels_.astype(float), #set color equal to a variable
+                colorscale='Rainbow', # one of plotly colorscales
+                showscale=True)),
+                go.Scatter3d(x=centroids[:,0],y=centroids[:,1],z=centroids[:,2],mode="markers",marker=dict(
+                size=16,
+                color='red'))]}, include_plotlyjs=False, output_type='div')
   else:
-    fig1_a='SUM of SQUARE of DISTANCE from RESPECTIVE CENTEROID'
-    fig2_a='KMEAN for MEDAL WON VS POPULATION'
-    ti='Population'
-  fig1 = offline.plot({"data":[go.Scatter(x=[1,2,3,4,5,6,7,8,9,10],y=wcss,mode="lines",marker=dict(
-    size=16,
-    color= [0,1,2,3,4,5,6,7,8,9], #set color equal to a variable
-    colorscale= 'Rainbow', # one of plotly colorscales
-    showscale=True
-  ))],"layout": go.Layout(title=fig1_a,xaxis={'title':'Number of Cluster'},yaxis={'title':'Sum of Square of each point from respective centroid'})},include_plotlyjs=False,output_type='div')
-  print(wcss)
-  print("Number of clusters:"+str(wcss.index(min(wcss))+1))
-  kmeans = KMeans(n_clusters = 4, init = 'k-means++', random_state = 42)
-  y_kmeans = kmeans.fit_predict(topMedalHolders[['Medal_WonNorm',s]])
-  centroids = kmeans.cluster_centers_
-  y_kmeans1=y_kmeans
-  y_kmeans1=y_kmeans+1
-  cluster = pd.DataFrame(y_kmeans1)
-  topMedalHolders['cluster'] = cluster
-  kmeans_mean_cluster = pd.DataFrame(round(topMedalHolders.groupby('cluster').mean(),1))
-  fig2=offline.plot({"data":[go.Scatter(x=topMedalHolders['Medal_WonNorm'],y=topMedalHolders[s],mode="markers",marker=dict(
-              size=16,
-              color= kmeans.labels_.astype(float), #set color equal to a variable
-              colorscale='Rainbow', # one of plotly colorscales
-              showscale=True))],
-            "layout": go.Layout(title=fig2_a,xaxis={'title':'Medal Won'},yaxis={'title':ti})}, include_plotlyjs=False, output_type='div')
+    wcss = []
+    for i in range(1, 11):
+        kmeans = KMeans(n_clusters = i, init = 'k-means++', random_state = 42)
+        kmeans.fit(topMedalHolders[['Medal_WonNorm', s]].values)
+        wcss.append(kmeans.inertia_)
+    if s=='GDPNorm':
+      fig1_a='SUM of SQUARE of DISTANCE from RESPECTIVE CENTEROID'
+      fig2_a='KMEAN for MEDAL WON VS GDP'
+      ti='GDP'
+    else:
+      fig1_a='SUM of SQUARE of DISTANCE from RESPECTIVE CENTEROID'
+      fig2_a='KMEAN for MEDAL WON VS POPULATION'
+      ti='Population'
+    fig1 = offline.plot({"data":[go.Scatter(x=[1,2,3,4,5,6,7,8,9,10],y=wcss,mode="lines",marker=dict(
+      size=16,
+      color= [0,1,2,3,4,5,6,7,8,9], #set color equal to a variable
+      colorscale= 'Rainbow', # one of plotly colorscales
+      showscale=True
+    ))],"layout": go.Layout(title=fig1_a,xaxis={'title':'Number of Cluster'},yaxis={'title':'Sum of Square of each point from respective centroid'})},include_plotlyjs=False,output_type='div')
+    print(wcss)
+    print("Number of clusters:"+str(wcss.index(min(wcss))+1))
+    kmeans = KMeans(n_clusters = 4, init = 'k-means++', random_state = 42)
+    y_kmeans = kmeans.fit_predict(topMedalHolders[['Medal_WonNorm',s]])
+    centroids = kmeans.cluster_centers_
+    y_kmeans1=y_kmeans+1
+    cluster = pd.DataFrame(y_kmeans1)
+    topMedalHolders['cluster'] = cluster
+    #kmeans_mean_cluster = pd.DataFrame(round(topMedalHolders.groupby('cluster').mean(),1))
+    fig2=offline.plot({"data":[go.Scatter(x=topMedalHolders['Medal_WonNorm'],y=topMedalHolders[s],mode="markers",marker=dict(
+                size=16,
+                color= kmeans.labels_.astype(float), #set color equal to a variable
+                colorscale='Rainbow', # one of plotly colorscales
+                showscale=True)),
+                go.Scatter3d(x=centroids[:,0],y=centroids[:,1],mode="markers",marker=dict(
+                size=16,
+                color='red'))],
+                        "layout": go.Layout(title=fig2_a,xaxis={'title':'Medal Won'},yaxis={'title':ti})
+                  }, include_plotlyjs=False, output_type='div')
   od = pd.read_csv('./assets/processed_dataset/processed_olympic_gdp_pop.csv')
   index = [int(x) for x in od['Year'].drop_duplicates().tolist() if int(x)>=1960]
   index.sort()
@@ -97,4 +126,4 @@ def fig(s,year=2016):
           'sel':s,
           'years':index,
           'Y':year,
-         }
+        }
